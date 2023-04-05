@@ -27,12 +27,6 @@ Route::group(['prefix' => 'v1'], function() {
     Route::get('governorates', [MainController::class, 'governorates']);
     Route::get('cities', [MainController::class, 'cities']);
     Route::get('categories', [MainController::class, 'categories']);
-    Route::get('donation-requests', [MainController::class, 'donationRequests']);
-    Route::post('donation-requests/create', [MainController::class, 'createDonationRequest']);
-    Route::get('notifications', [MainController::class, 'notifications']);
-    Route::get('settings', [MainController::class, 'settings']);
-    Route::get('contacts', [MainController::class, 'contacts']);
-    Route::get('posts/{post}', [MainController::class, 'showPost']);
 
 
 
@@ -40,7 +34,14 @@ Route::group(['prefix' => 'v1'], function() {
     Route::post('login', [AuthController::class, 'login']);
 
     Route::group(['middleware' => 'auth:api'], function() {
+
+        Route::get('donation-requests', [MainController::class, 'donationRequests']);
+        Route::post('donation-requests/create', [MainController::class, 'createDonationRequest']);
+        Route::get('notifications', [MainController::class, 'notifications']);
+        Route::get('settings', [MainController::class, 'settings']);
+        Route::post('contacts', [MainController::class, 'contacts']);
         Route::get('posts', [MainController::class, 'posts']);
+        Route::get('posts/{post}', [MainController::class, 'showPost']);
 
 
     });

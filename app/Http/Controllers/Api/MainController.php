@@ -13,16 +13,12 @@ use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Models\DonationRequest;
 use App\Http\Controllers\Controller;
+use App\traits\ApiResponse;
 
 class MainController extends Controller
 {
-    private function apiResponse($status, $message, $data = null, $statusCode = 200) {
-        return response()->json([
-            'status' => $status,
-            'message' => $message,
-            'data' => $data
-        ], $statusCode);
-    }
+    use apiResponse;
+
 
     public function bloodTypes() {
 
@@ -61,7 +57,7 @@ class MainController extends Controller
 
     public function categories(Request $request) {
 
-        $categories = Category::all();
+        $categories = Category::paginate(5);
 
         return $this->apiResponse(1, 'success', $categories);
 
@@ -77,7 +73,7 @@ class MainController extends Controller
 
             }
 
-        })->get();
+        })->paginate(5);
 
         return $this->apiResponse(1, 'success', $posts);
 
@@ -125,7 +121,7 @@ class MainController extends Controller
 
                 }
 
-        })->get();
+        })->paginate(5);
 
         return $this->apiResponse(1, 'success', $donation_requests);
 
@@ -133,7 +129,7 @@ class MainController extends Controller
 
     public function notifications() {
 
-        $notifications = Notification::with('donationRequest')->get();
+        $notifications = Notification::with('donationRequest')->paginate(5);
 
         return $this->apiResponse(1, 'success', $notifications);
 
@@ -141,7 +137,8 @@ class MainController extends Controller
 
     public function settings() {
 
-        $settings = Setting::all();
+        $settings = Setting::first();
+
 
         return $this->apiResponse(1, 'success', $settings);
 
@@ -153,11 +150,24 @@ class MainController extends Controller
 
     }
 
-    public function contacts() {
+    public function contacts(Request $request) {
 
-        $contacts = Contact::all();
+        $validator = validator()->make($request->all(), [
+            'subject' => 'required',
+            'message' => 'required'
+        ]);
 
-        return $this->apiResponse(1, 'success', $contacts);
+        if($validator->fails()) {
+
+            return $this->apiResponse(0, $validator->errors()->first(), $validator->errors());
+
+        };
+
+
+        $contact = Contact::create($request->all());
+
+
+        return $this->apiResponse(1, 'success', $contact);
 
     }
 

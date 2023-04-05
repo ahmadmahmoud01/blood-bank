@@ -8,17 +8,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Validator;
+use App\traits\ApiResponse;
 
 class AuthController extends Controller
 {
 
-    private function apiResponse($status, $message, $data = null, $statusCode = 200) {
-        return response()->json([
-            'status' => $status,
-            'message' => $message,
-            'data' => $data
-        ], $statusCode);
-    }
+    use ApiResponse;
 
 
     public function register(Request $request) {
