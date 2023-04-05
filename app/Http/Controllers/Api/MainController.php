@@ -4,16 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\City;
 use App\Models\Post;
+use App\Models\Client;
 use App\Models\Contact;
 use App\Models\Setting;
 use App\Models\Category;
 use App\Models\BloodType;
 use App\Models\Governorate;
+use App\traits\ApiResponse;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Models\DonationRequest;
 use App\Http\Controllers\Controller;
-use App\traits\ApiResponse;
 
 class MainController extends Controller
 {
@@ -26,10 +27,7 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success message', $blood_types);
 
-
-
-    }
-
+    }// end of blood types
 
     public function governorates() {
 
@@ -37,7 +35,7 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success', $governorates);
 
-    }
+    }// end of governorates
 
     public function cities(Request $request) {
 
@@ -53,7 +51,7 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success', $cities);
 
-    }
+    }// end of cities
 
     public function categories(Request $request) {
 
@@ -61,7 +59,7 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success', $categories);
 
-    }
+    }// end of categories
 
     public function posts(Request $request) {
 
@@ -77,7 +75,7 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success', $posts);
 
-    }
+    }// end of posts
 
     public function createDonationRequest(Request $request) {
 
@@ -104,9 +102,7 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success', $donation_request);
 
-
-
-    }
+    }// end of create donation request
 
     public function donationRequests(Request $request) {
 
@@ -125,7 +121,7 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success', $donation_requests);
 
-    }
+    }// end of donation requests
 
     public function notifications() {
 
@@ -133,7 +129,7 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success', $notifications);
 
-    }
+    }// end of nitifications
 
     public function settings() {
 
@@ -142,13 +138,13 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success', $settings);
 
-    }
+    }// end of settings
 
     public function showPost(Post $post) {
 
         return $this->apiResponse(1, 'success', $post);
 
-    }
+    }// end of show post
 
     public function contacts(Request $request) {
 
@@ -169,7 +165,16 @@ class MainController extends Controller
 
         return $this->apiResponse(1, 'success', $contact);
 
-    }
+    } // end of contacts
+
+    public function updateProfile(Client $client, Request $request) {
+
+        $client->update($request->all());
+
+        return $this->apiResponse(1, 'success', $client);
+
+    } // end of update profile
+
 
 
 }

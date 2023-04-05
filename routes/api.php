@@ -42,6 +42,9 @@ Route::group(['prefix' => 'v1'], function() {
         Route::post('contacts', [MainController::class, 'contacts']);
         Route::get('posts', [MainController::class, 'posts']);
         Route::get('posts/{post}', [MainController::class, 'showPost']);
+        Route::post('clients/{client}/update', [MainController::class, 'updateProfile']);
+        Route::post('clients/reset-password', [AuthController::class, 'resetPassword']);
+        Route::post('clients/new-password', [AuthController::class, 'newPassword']);
 
 
     });
