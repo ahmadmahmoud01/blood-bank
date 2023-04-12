@@ -12,14 +12,19 @@ use App\Models\BloodType;
 use App\Models\Governorate;
 use App\traits\ApiResponse;
 use App\Models\Notification;
+use App\traits\notifyByFirebase;
 use Illuminate\Http\Request;
 use App\Models\DonationRequest;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\api\ContactRequest;
+use App\Http\Requests\api\DonationRequestValidation;
 
-class MainController extends Controller
-{
+// use function App\helpers\apiResponse;
+
+
+class MainController extends Controller {
     use apiResponse;
-
+    use notifyByFirebase;
 
     public function bloodTypes() {
 
@@ -77,20 +82,10 @@ class MainController extends Controller
 
     }// end of posts
 
-    public function createDonationRequest(Request $request) {
+    public function createDonationRequest(DonationRequestValidation $request) {
 
-        $validator = validator()->make($request->all(), [
-            'patient_name' => 'required',
-            'patient_phone' => 'required',
-            'patient_age' => 'required|integer',
-            'hospital_name' => 'required',
-            'hospital_address' => 'required',
-            'bags_nums' => 'required|integer',
-            'details' => 'required',
-            'city_id' => 'required|exists:cities,id',
-            'client_id' => 'required|exists:clients,id',
-            'blood_type_id' => 'required|exists:blood_types,id',
-        ]);
+
+        $validator = validator()->make($request->all(), $request->rules());
 
         if($validator->fails()) {
 
@@ -109,11 +104,27 @@ class MainController extends Controller
         $donation_requests = DonationRequest::with('bloodType', 'client', 'city')
             ->where(function($query) use ($request) {
 
-                if($request->has('blood_type_id') || $request->has('client_id') || $request->has('city_id') ) {
+                // if($request->has('blood_type_id') || $request->has('client_id') || $request->has('city_id') ) {
 
-                    return $query->where('blood_type_id', $request->blood_type_id)
-                        ->orWhere('client_id', $request->client_id)
-                        ->orWhere('city_id', $request->city_id);
+                //     return $query->where('blood_type_id', $request->blood_type_id)
+                //         ->orWhere('client_id', $request->client_id)
+                //         ->orWhere('city_id', $request->city_id);
+
+                // }
+
+                if($request->has('blood_type_id')) {
+
+                    $query->where('blood_type_id', $request->blood_type_id);
+
+                }
+                if($request->has('client_id')) {
+
+                    $query->where('client_id', $request->client_id);
+
+                }
+                if($request->has('city_id')) {
+
+                    $query->where('city_id', $request->city_id);
 
                 }
 
@@ -123,9 +134,9 @@ class MainController extends Controller
 
     }// end of donation requests
 
-    public function notifications() {
+    public function notifications(Request $request) {
 
-        $notifications = Notification::with('donationRequest')->paginate(5);
+        $notifications = $request->user()->notifications()->with('donationRequest')->paginate(5);
 
         return $this->apiResponse(1, 'success', $notifications);
 
@@ -135,23 +146,28 @@ class MainController extends Controller
 
         $settings = Setting::first();
 
-
         return $this->apiResponse(1, 'success', $settings);
 
     }// end of settings
 
     public function showPost(Post $post) {
 
-        return $this->apiResponse(1, 'success', $post);
+        if($post) {
+
+            return $this->apiResponse(1, 'success', $post);
+
+        } else {
+
+            return $this->apiResponse(0, 'No data found');
+
+        }
 
     }// end of show post
 
-    public function contacts(Request $request) {
+    public function contacts(ContactRequest $request) {
 
-        $validator = validator()->make($request->all(), [
-            'subject' => 'required',
-            'message' => 'required'
-        ]);
+        $validator = validator()->make($request->all(), $request->rules());
+        // $validator = $request->validate($request->rules());
 
         if($validator->fails()) {
 
@@ -167,13 +183,41 @@ class MainController extends Controller
 
     } // end of contacts
 
-    public function updateProfile(Client $client, Request $request) {
+    public function toggleFavourite(Request $request) {
 
-        $client->update($request->all());
+        $validator = validator()->make($request->all(), [
 
-        return $this->apiResponse(1, 'success', $client);
+            'post_id' => 'required|exists:posts,id'
 
-    } // end of update profile
+        ]);
+
+        if($validator->fails()) {
+
+            return $this->apiResponse(0, $validator->errors()->first(), $validator->errors());
+
+        }
+
+        $post = $request->user()->posts()->toggle($request->post_id);
+
+        return $this->apiResponse(1, 'success', $post);
+
+        }// end of toggle favorites
+
+
+        public function allFavourites(Request $request) {
+
+        $allFavourites = $request->user()->posts()->get();
+
+        return $this->apiResponse(1, 'success', $allFavourites);
+
+    }// end of all favorites
+
+    
+
+
+
+
+
 
 
 

@@ -3,46 +3,44 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Client;
+use App\Mail\ResetPassword;
+use App\traits\ApiResponse;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Validator;
-use App\traits\ApiResponse;
 
-class AuthController extends Controller
-{
+use function App\helpers\apiResponse;
+use App\Http\Requests\api\RegisterRequest;
+use App\Http\Requests\api\UpdateNotificationRequest;
+
+class AuthController extends Controller {
 
     use ApiResponse;
 
 
-    public function register(Request $request) {
+    public function register(RegisterRequest $request) {
 
-        $validator = validator()->make($request->all(), [
-            'name' => 'required',
-            'email' => 'required|unique:clients',
-            'password' => 'required|confirmed',
-            'phone' => 'required',
-            'city_id' => 'required',
-            'blood_type_id' => 'required',
-            'd_o_b' => 'required',
-            'last_donation_date' => 'required',
-        ]);
+        $validator = validator()->make($request->all(), $request->rules());
 
         if($validator->fails()) {
 
-            return $this->apiResponse(0, 'خطأ', $validator->errors(), 403);
+            return $this->apiResponse(0, 'خطأ', $validator->errors(), 422);
 
         }
 
         $request['password'] = bcrypt($request->password);
 
         $client = Client::create($request->all());
-        $client->api_token = Str::random(60);
-        $client->save();
+        $token = $client->createToken('myapptoken')->plainTextToken;
+
+        $client->pin_code = null;
+
 
         return $this->apiResponse('1', 'تم الاضافة بنجاح', [
-            'api_token' => $client->api_token,
+            'token' =>$token,
             'client' => $client
         ]);
 
@@ -69,7 +67,7 @@ class AuthController extends Controller
 
                 return $this->apiResponse(1, 'تم تسجيل الدخول بنجاح', [
 
-                    'api_token' => $client->api_token,
+                    'token' => $client->createToken('myapptoken')->plainTextToken,
                     'client' => $client
 
                 ]);
@@ -92,9 +90,7 @@ class AuthController extends Controller
 
     public function resetPassword(Request $request) {
 
-        $validator = validator()->make($request->all(), [
-            'phone' => 'required'
-        ]);
+        $validator = validator()->make($request->all(), ['phone' => 'required']);
 
         if($validator->fails()) {
 
@@ -102,29 +98,35 @@ class AuthController extends Controller
 
         }
 
-        $client = Client::where('phone', $request->phone);
+        $client = Client::where('phone', $request->phone)->first();
+
+        // dd($client);
 
         if($client) {
 
-            $pin_code = rand(10000, 99999);
+            $code = rand(1111,9999);
 
-            $new_pin_code = $client->update(['pin_code' => $pin_code]);
+            $client->pin_code = $code;
+            $client->save();
+            // update(['pin_code' => $code]);
+            // dd($client);
 
-            if($new_pin_code) {
 
-                return $this->apiResponse(1, 'تم ارسال الكود', ['pin_code' => $pin_code]);
+            if($client->save() == true) {
+                Mail::to("ahmadelmehdawe@gmail.com")
+                    // ->bcc($client->email)
+                    ->send(new ResetPassword($code));
+
+                return apiResponse(1, 'برجاء فحص الحساب', ['pin_code_for_reset' => $code]);
 
             } else {
 
-                return $this->apiResponse(0, 'بياناتك غير صحيحة');
+                return apiResponse(0, 'حدث خطأ حاول مرة أخرى');
 
             }
 
-
         }else {
-
-            return $this->apiResponse(0, 'بياناتك غير صحيحة');
-
+            return apiResponse(0, 'لايوجد حساب لهذا الرقم');
         }
 
     }// end of reset password
@@ -133,6 +135,7 @@ class AuthController extends Controller
 
         $validator = validator()->make($request->all(), [
             'pin_code' => 'required',
+            'phone' => 'required',
             'password' => 'required|confirmed'
         ]);
 
@@ -142,7 +145,10 @@ class AuthController extends Controller
 
         }
 
-        $client = Client::where('pin_code', $request->pin_code)->first();
+        $client = Client::where([
+                ['pin_code' , $request->pin_code],
+                ['phone', $request->phone]
+            ])->first();
 
         if($client) {
 
@@ -156,7 +162,52 @@ class AuthController extends Controller
 
         }
 
-
-
     }// end of new password
+
+    public function logout(Request $request) {
+
+        $request->user()->CurrentAccessToken()->delete();
+
+        return ['message' => 'logged out'];
+
+    }// end of logout
+
+    public function updateProfile(Client $client, Request $request) {
+
+        $client = tap($client)->update($request->all());
+
+        return $this->apiResponse(1, 'success', $client->fresh());
+
+    } // end of update profile
+
+    public function updateNotificationSettings (UpdateNotificationRequest $request) {
+
+        $validator = validator()->make($request->all(), $request->rules());
+
+        if($validator->fails()) {
+
+          return apiResponse(0, $validator->errors()->first(), $validator->errors());
+
+        }
+
+        $request->user()->bloods()->sync($request->blood_types);
+        $request->user()->governorates()->sync($request->governorates);
+
+        return apiResponse(1,'success');
+
+    }
+
+    public function getNotificationSettings (Request $request) {
+
+        $data = [
+
+            'blood_types' => $request->user()->bloods()->pluck('blood_types.id')->toArray(),
+            'governorates' => $request->user()->governorates()->pluck('governorates.id')->toArray(),
+
+        ];
+
+        return $this->apoiResponse(1,'success',$data);
+    }
+
+
 }

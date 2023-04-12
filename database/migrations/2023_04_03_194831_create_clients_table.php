@@ -18,17 +18,18 @@ class CreateClientsTable extends Migration {
 			$table->date('last_donation_date');
 			$table->integer('pin_code');
 
-            $table->unsignedBigInteger('city_id');
+            // $table->unsignedBigInteger('city_id');
 
-            $table->foreign('city_id')->references('id')->on('cities');
+            // $table->foreign('city_id')->references('id')->on('cities');
 
-            $table->unsignedBigInteger('blood_type_id');
+            // $table->unsignedBigInteger('blood_type_id');
 
-            $table->foreign('blood_type_id')->references('id')->on('blood_types');
+            // $table->foreign('blood_type_id')->references('id')->on('blood_types');
 
 
 			// $table->foreignId('city_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
 			// $table->foreignId('blood_type_id')->constrained()->cascadeOnDelete()->cascadeOnUpdate();
+
             $table->string('api_token')->unique()->nullable();
 			$table->timestamps();
 		});

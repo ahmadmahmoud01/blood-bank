@@ -30,10 +30,12 @@ Route::group(['prefix' => 'v1'], function() {
 
 
 
+    Route::post('clients/reset-password', [AuthController::class, 'resetPassword']);
+    Route::post('clients/new-password', [AuthController::class, 'newPassword']);
     Route::post('register', [AuthController::class, 'register']);
     Route::post('login', [AuthController::class, 'login']);
 
-    Route::group(['middleware' => 'auth:api'], function() {
+    Route::group(['middleware' => 'auth:sanctum'], function() {
 
         Route::get('donation-requests', [MainController::class, 'donationRequests']);
         Route::post('donation-requests/create', [MainController::class, 'createDonationRequest']);
@@ -42,9 +44,14 @@ Route::group(['prefix' => 'v1'], function() {
         Route::post('contacts', [MainController::class, 'contacts']);
         Route::get('posts', [MainController::class, 'posts']);
         Route::get('posts/{post}', [MainController::class, 'showPost']);
-        Route::post('clients/{client}/update', [MainController::class, 'updateProfile']);
-        Route::post('clients/reset-password', [AuthController::class, 'resetPassword']);
-        Route::post('clients/new-password', [AuthController::class, 'newPassword']);
+        Route::post('clients/{client}/update', [AuthController::class, 'updateProfile']);
+        Route::post('logout', [AuthController::class, 'logout']);
+        Route::post('toggle-favourite', [MainController::class, 'toggleFavourite'] );
+        Route::get('all-favourites', [MainController::class, 'allFavourites'] );
+        Route::post('update-notification-settings', [AuthController::class, 'updateNotificationSettings'] );
+        Route::get('get-notification-settings', [AuthController::class, 'getNotificationSettings'] );
+
+        
 
 
     });
