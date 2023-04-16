@@ -1,7 +1,8 @@
 <?php
 
-use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Database\Migrations\Migration;
 
 class CreateClientGovernorateTable extends Migration {
 
@@ -9,8 +10,8 @@ class CreateClientGovernorateTable extends Migration {
 	{
 		Schema::create('client_governorate', function(Blueprint $table) {
 			$table->increments('id');
-			$table->integer('client_id')->unsigned();
-			$table->integer('governorate_id')->unsigned();
+			$table->foreignId('client_id')->unsigned();
+			$table->foreignId('governorate_id')->unsigned();
 			$table->timestamps();
 		});
 	}

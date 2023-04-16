@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\City;
 use App\Models\Post;
+use App\Models\Token;
 use App\Models\Client;
 use App\Models\Contact;
 use App\Models\Setting;
@@ -12,9 +13,9 @@ use App\Models\BloodType;
 use App\Models\Governorate;
 use App\traits\ApiResponse;
 use App\Models\Notification;
-use App\traits\notifyByFirebase;
 use Illuminate\Http\Request;
 use App\Models\DonationRequest;
+use App\traits\notifyByFirebase;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\api\ContactRequest;
 use App\Http\Requests\api\DonationRequestValidation;
@@ -82,22 +83,111 @@ class MainController extends Controller {
 
     }// end of posts
 
-    public function createDonationRequest(DonationRequestValidation $request) {
+    // public function createDonationRequest(DonationRequestValidation $request) {
 
 
-        $validator = validator()->make($request->all(), $request->rules());
+    //     $validator = validator()->make($request->all(), $request->rules());
 
-        if($validator->fails()) {
+    //     if($validator->fails()) {
 
-            return $this->apiResponse(0, $validator->errors()->first(), $validator->errors());
+    //         return $this->apiResponse(0, $validator->errors()->first(), $validator->errors());
+
+    //     }
+
+    //     $donation_request = DonationRequest::create($request->all());
+
+    //     return $this->apiResponse(1, 'success', $donation_request);
+
+    // }// end of create donation request
+
+     ////////////////////////////// start donationRequestCreate ///////////////
+    public function createDonationRequest(Request $request){
+    //validation
+    $validator = validator()->make($request->all(), [
+
+        'patient_name'         =>'required',
+        'patient_age'          =>'required',
+        'blood_type_id'        =>'required|exists:blood_types,id',
+        'bags_nums'            =>'required',
+        'hospital_name'        =>'required',
+        'hospital_address'     =>'required',
+        'latitude'             =>'nullable',
+        'longitude'            =>'nullable',
+        'city_id'              =>'required|exists:cities,id',
+        'patient_phone'        =>'required',
+        'details'              =>'required',
+
+    ]);
+
+    if($validator->fails()) {
+
+        return $this->apiResponse(0, $validator->errors()->first(), $validator->errors());
+
+    }
+
+    // dd(CurrentAcccessToken());
+
+
+    //create donationRequest
+    $donationRequest = $request->user()->donationRequests()->create($request->all());
+
+    // dd($donationRequest->city->governorate->clients);
+
+    //find clients suitable for this donation request
+    $clientsIds = $donationRequest->city->governorate->clients()
+        ->whereHas('bloodType',function ($q) use($request, $donationRequest) {
+
+            $q->where('blood_types.id', $request->blood_type_id);
+
+        })->pluck('clients.id')->toArray();
+
+        // dd(count($clientsIds));
+
+        if (count($clientsIds)) {
+
+            //create a notification on database
+            $notification = $donationRequest->notifications()->create([
+
+                'title'   => 'يوجد حالة تبرع قريبة منك',
+                'content' => optional($donationRequest->blood_type)->name . 'محتاج تبرع لفصيلة'
+
+            ]);
+
+            // attach clients to this notification
+            $notification->clients()->attach($clientsIds);
 
         }
 
-        $donation_request = DonationRequest::create($request->all());
+        // dd($clientsIds->tokens());
 
-        return $this->apiResponse(1, 'success', $donation_request);
+        // get tokens
+        $tokens = Token::where('client_id', $clientsIds)->where('token','!=', null)->pluck('token')->toArray();
+        // $tokens = $clientsIds->currentAccessToken()->toArray();
 
-    }// end of create donation request
+        // dd($tokens);
+        if (count($tokens)) {
+
+            $title = $notification->title;
+            $body = $notification->content;
+
+        $data =[
+
+            'donation_request_id' => $donationRequest->id
+
+        ];
+
+        $send = $this->notifyByFirebase($title, $body, $tokens, $data);
+
+        dd($send);
+
+        }
+
+        return $this->apiResponse(1, 'success', $donationRequest);
+
+
+    }
+
+ ////////////////////////////// end donationRequestCreate ///////////////
 
     public function donationRequests(Request $request) {
 
@@ -206,13 +296,13 @@ class MainController extends Controller {
 
         public function allFavourites(Request $request) {
 
-        $allFavourites = $request->user()->posts()->get();
+        $allFavourites = $request->user()->posts()->paginate(5);
 
         return $this->apiResponse(1, 'success', $allFavourites);
 
     }// end of all favorites
 
-    
+
 
 
 
