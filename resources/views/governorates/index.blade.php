@@ -16,6 +16,10 @@
 <a class="modal-effect btn btn-md btn-primary my-3" data-effect="effect-scale" data-toggle="modal"
 href="#createGov" title="add governorate"><i class="las la-pen fa fa-plus mr-2"></i>Add Governorate</a>
 
+@error('name')
+        <div class="alert alert-danger my-3">{{ $message }}</div>
+@enderror
+
 @if (session('create'))
     <div class="alert alert-success">
         {{ session('create') }}
@@ -47,21 +51,22 @@ href="#createGov" title="add governorate"><i class="las la-pen fa fa-plus mr-2">
                 <tr class="text-center">
                     <th scope="row">{{ $loop->iteration }}</th>
                     <td>{{ $governorate->name }}</td>
-                    {{-- <td><a href="{{ route('governorates.edit', $governorate->id) }}" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a></td> --}}
-                    <td><a class="btn btn-primary btn-sm modal-effect" data-toggle="modal" data-effect="effect-scale"
+                    <td><a href="{{ route('governorates.edit', $governorate->id) }}" class="btn btn-primary btn-sm"><i class="fa fa-edit"></i></a></td>
+                    {{-- <td><a class="btn btn-primary btn-sm modal-effect" data-toggle="modal" data-effect="effect-scale"
                         data-id="{{ $governorate->id }}" data-name="{{ $governorate->name }}" href="#editGov"><i class="fa fa-edit"></i></a></td>
-                    <td>
+                    <td> --}}
                         {{-- <form action="{{ route('governorates.destroy', $governorate->id) }}" method="POST">
 
                             @csrf
                             @method('DELETE')
                             <button class="btn btn-danger" type="submit"><i class="fa fa-trash"></i></button>
                         </form> --}}
-
+                    <td>
                         <a class="modal-effect btn btn-sm btn-danger" data-effect="effect-scale"
                         data-id="{{ $governorate->id }}" data-name="{{ $governorate->name }}"
                         data-toggle="modal" href="#deleteGov" title="حذف"><i
                             class="fa fa-trash"></i></a>
+                    </td>
                 </tr>
 
             @endforeach
@@ -103,7 +108,7 @@ href="#createGov" title="add governorate"><i class="las la-pen fa fa-plus mr-2">
 
 
 <!-- Edit -->
-<div class="modal fade" id="editGov" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+{{-- <div class="modal fade" id="editGov" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -114,11 +119,11 @@ href="#createGov" title="add governorate"><i class="las la-pen fa fa-plus mr-2">
             </div>
             <div class="modal-body">
 
-                <form action="" method="post" autocomplete="off">
-                    {{ method_field('patch') }}
+                <form action="{{ route() }}" method="post" autocomplete="off">
+                    {{ method_field('PUT') }}
                     {{ csrf_field() }}
                     <div class="form-group">
-                        <input type="text" name="id" id="id" value="">
+                        <input type="hidden" name="id" id="id" value="">
                         <label for="name" class="col-form-label">name</label>
                         <input class="form-control" name="name" id="name" type="text" >
                     </div>
@@ -132,7 +137,7 @@ href="#createGov" title="add governorate"><i class="las la-pen fa fa-plus mr-2">
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
  <!-- delete -->
  <div class="modal fade" id="deleteGov">
@@ -147,7 +152,7 @@ href="#createGov" title="add governorate"><i class="las la-pen fa fa-plus mr-2">
                 {{ csrf_field() }}
                 <div class="modal-body">
                     <p>Are you sure you want to delete this item ?</p><br>
-                    <input type="text" name="id" id="id" value="{{ $governorate->id }}">
+                    <input type="hidden" name="id" id="id" value="{{ $governorate->id }}">
                     <input class="form-control" name="name" id="name" type="text" readonly>
                 </div>
                 <div class="modal-footer">
@@ -163,19 +168,22 @@ href="#createGov" title="add governorate"><i class="las la-pen fa fa-plus mr-2">
  @endsection
 
 
- <script src="{{ asset('adminassets/dist/js/jquery-3.6.4.js') }}"></script>
-
 <!-- Internal Modal js-->
-<script src="{{ asset('adminassets/dist/js/modal.js') }}"></script>
-
+{{-- <script src="{{ asset('adminassets/dist/js/modal.js') }}"></script> --}}
+@push('scripts')
 <script>
+    console.log('hello')
     $('#editGov').on('show.bs.modal', function(event) {
+        console.log('bs show')
         var button = $(event.relatedTarget)
         var id = button.data('id')
         var name = button.data('name')
-        var modal = $(this)
-        modal.find('.modal-body #id').val(id);
-        modal.find('.modal-body #name').val(name);
+        console.log(id,name);
+        $("#id").val(id);
+        $("#name").val(name);
+        // var modal = $(this)
+        // modal.find('.modal-body #id').val(id);
+        // modal.find('.modal-body #name').val(name);
     })
 </script>
 
@@ -189,4 +197,4 @@ href="#createGov" title="add governorate"><i class="las la-pen fa fa-plus mr-2">
         modal.find('.modal-body #name').val(name);
     })
 </script>
-
+@endpush

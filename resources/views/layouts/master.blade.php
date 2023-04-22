@@ -199,56 +199,78 @@
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Dashboard
-                <i class="right fas fa-angle-left"></i>
-              </p>
-            </a>
-            <ul class="nav nav-treeview">
-              <li class="nav-item">
-                <a href="../../index.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v1</p>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                    Dashboard
+                    <i class="right fas fa-angle-left"></i>
+                </p>
                 </a>
-              </li>
-              <li class="nav-item">
-                <a href="../../index2.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v2</p>
+                <ul class="nav nav-treeview">
+                    <li class="nav-item">
+                        <a href="../../index.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Dashboard v1</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../../index2.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Dashboard v2</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="../../index3.html" class="nav-link">
+                        <i class="far fa-circle nav-icon"></i>
+                        <p>Dashboard v3</p>
+                        </a>
+                    </li>
+                </ul>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('governorates.index') }}" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                    Governorates
+                    <i class="right fas"></i>
+                </p>
                 </a>
-              </li>
-              <li class="nav-item">
-                <a href="../../index3.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v3</p>
+
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('cities.index') }}" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                    Cities
+                    <i class="right fas"></i>
+                </p>
                 </a>
-              </li>
-            </ul>
-          </li>
-          <li class="nav-item">
-            <a href="{{ route('governorates.index') }}" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Governorates
-                <i class="right fas"></i>
-              </p>
-            </a>
 
-          </li>
+            </li>
 
-          <li class="nav-item">
-            <a href="{{ route('cities.index') }}" class="nav-link">
-              <i class="nav-icon fas fa-tachometer-alt"></i>
-              <p>
-                Cities
-                <i class="right fas"></i>
-              </p>
-            </a>
+            <li class="nav-item">
+                <a href="{{ route('categories.index') }}" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                    Categories
+                    <i class="right fas"></i>
+                </p>
+                </a>
 
-          </li>
+            </li>
+
+            <li class="nav-item">
+                <a href="{{ route('posts.index') }}" class="nav-link">
+                <i class="nav-icon fas fa-tachometer-alt"></i>
+                <p>
+                    Posts
+                    <i class="right fas"></i>
+                </p>
+                </a>
+
+            </li>
 
 
 
@@ -329,13 +351,28 @@
 </div>
 <!-- ./wrapper -->
 
+{{-- Pusher --}}
+<script src="https://code.jquery.com/jquery-3.6.4.min.js" integrity="sha256-oP6HI9z1XaZNBrJURtCoUT5SUnxFr8s3BzRl+cbzUq8=" crossorigin="anonymous"></script>
+{{-- <script src="https://js.pusher.com/7.2/pusher.min.js"></script>
+  <script>
+
+    // Enable pusher logging - don't include this in production
+    Pusher.logToConsole = true;
+
+    var pusher = new Pusher('2f0facb70c48e4cc4dd4', {
+      cluster: 'mt1'
+    });
+</script> --}}
+
+
 <!-- jQuery -->
-<script src="{{ asset('adminassets/dist/plugins/jquery.min.js') }} "></script>
+{{-- <script src="{{ asset('adminassets/dist/plugins/jquery.min.js') }} "></script> --}}
 <!-- Bootstrap 4 -->
 <script src=" {{ asset('adminassets/dist/plugins/bootstrap.bundle.js') }} "></script>
 <!-- AdminLTE App -->
 <script src="{{ asset('adminassets/dist/js/adminlte.min.js') }}"></script>
 <!-- AdminLTE for demo purposes -->
-<script src="{{ asset('adminassets/dist/js/demo.js') }}"></script>
+
+@stack('scripts')
 </body>
 </html>

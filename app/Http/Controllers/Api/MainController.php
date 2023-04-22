@@ -178,7 +178,7 @@ class MainController extends Controller {
 
         $send = $this->notifyByFirebase($title, $body, $tokens, $data);
 
-        dd($send);
+        // dd($send);
 
         }
 

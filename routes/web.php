@@ -1,9 +1,11 @@
 <?php
 
-use App\Http\Controllers\CityController;
-use App\Http\Controllers\GovernorateController;
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CityController;
+use App\Http\Controllers\PostController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\GovernorateController;
 
 /*
 |--------------------------------------------------------------------------
@@ -32,5 +34,8 @@ Route::middleware('auth')->group(function () {
 
 Route::resource('governorates', GovernorateController::class);
 Route::resource('cities', CityController::class);
+Route::resource('categories', CategoryController::class);
+Route::resource('clients', ClientController::class);
+Route::resource('posts', PostController::class);
 
 require __DIR__.'/auth.php';
